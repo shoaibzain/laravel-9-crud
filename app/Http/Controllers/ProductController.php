@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Faker\Guesser\Name;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -46,10 +47,66 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required',
             'detail' => 'required',
+            'toppings.*.title' => 'sometimes|nullable|string',
+            'toppings.*.title.description' => 'sometimes|nullable|string',
+            'toppings.*.title.caed' => 'sometimes|nullable|string',
+            'toppings.*.title.adddetail' => 'sometimes|nullable|string',
         ]);
-    
-        Product::create($request->all());
+
+        $input = $request->all();
+        $condition = $input['toppings'];
+
+        foreach ($condition as $key => $condition) {
+
+        $store = new Product();
+        $store->name = $request->name;
+        $store->detail = $request->detail;
+       /* $data = [
+                    "name" => $request->name, 
+                    "request" => [ 
+                        'method' =>  $request->type,
+                        'body' => [
+                            "mode" => "raw",
+                            'raw' => $request->raw_data,
+                            "options" => [
+                                "raw" => [
+                                    "language" => "json"
+                                ],
+                            ],
+                        ],
+                        'url' =>  [
+                            "raw" =>  $request->url,
+                            "host" => [
+                                $request->url
+                            ]
+                        ], 
+                    ],
+                ];
+        $store->toppings=json_encode($data);*/
+       $store->toppings = json_encode($input['toppings'][$key]);
+
+        $store->save();
+        }
+       //Product::create($request->all());
+       // error_log(Request('toppings'));
+       //dd($store);
      
+    //    $this->validate($request,[
+    //     'name' => 'required|min:4',
+    //     'detail' => 'required',
+    //     'toppings' => 'required|unique:products'
+    // ]);
+    // $input = $request->all();
+    // $condition = $input['toppings'];
+    // foreach ($condition as $key => $condition) {
+    //     $student = new Product();
+    //     $student->name = $request->name;
+    //     $student->detail = $request->detail;
+    //     $student->toppings = json_encode($input['toppings'][$key]);
+    //     $student->save();
+    // }
+    // dd($student);
+
         return redirect()->route('products.index')
                         ->with('success','Product created successfully.');
     }
